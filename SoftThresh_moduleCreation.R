@@ -2,7 +2,7 @@
 
 #### Following on from file prep 
 
-load(file="lncRNA_input.RData")
+load(file="lncRNA_total_input.RData")
 
 
 ####
@@ -90,10 +90,10 @@ match("DNMT1", names(block4))
 match("DNMT1", names(block5))
 
 
-# open a graphics window
-sizeGrWindow(12, 9)
+
 # Convert labels to colors for plotting
 
+# Relabel blockwise modules
 moduleLabels = bwnet$colors
 moduleColours = labels2colors(bwnet$colors)
 
@@ -102,12 +102,16 @@ table(moduleColours)
 
 ##### Now we'll make a dataframe to store the moduleColours for genes, 
 ### We'll keep adding to this baby later
-Modules <- data.frame(colnames(exp), moduleColours)
+### Match the names in the blocks to the colours
+
+
+Modules <- data.frame(colnames(datExpr), moduleColours)
 lookfor <- c("DNMT1", "DNMT3A", "DNMT3B", "UHRF1", "EZH2", "DNMT3L")
 
-Interest_mods <- Modules[Modules$colnames.exp %in% lookfor,] 
+Interest_mods <- Modules[Modules$colnames.datExpr %in% lookfor,] 
 
-
+# open a graphics window
+sizeGrWindow(12, 9)
 #### Manual Blockwise
 ##open a graphics window
 sizeGrWindow(6,6)
@@ -139,6 +143,81 @@ plotDendroAndColors(bwnet$dendrograms[[5]], moduleColours[bwnet$blockGenes[[5]]]
 
 
 ##############################################################
+####  Now let's try the static cut
+
+static1 <- as.character(cutreeStaticColor(bwnet$dendrograms[[1]], cutHeight=.98, minSize=100))
+# Plot the dendrogram with module colors
+sizeGrWindow(10,5);
+plotDendroAndColors(bwnet$dendrograms[[1]], 
+                    colors = data.frame( moduleColours[bwnet$blockGenes[[1]]],static1),
+                    dendroLabels = FALSE, abHeight = 0.99,
+                    main = "Gene dendrogram and module colors")
+
+static2 <- as.character(cutreeStaticColor(bwnet$dendrograms[[2]], cutHeight=.98, minSize=100))
+# Plot the dendrogram with module colors
+sizeGrWindow(10,5);
+plotDendroAndColors(bwnet$dendrograms[[2]], 
+                    colors = data.frame( moduleColours[bwnet$blockGenes[[2]]],static2),
+                    dendroLabels = FALSE, abHeight = 0.99,
+                    main = "Gene dendrogram and module colors")
+
+
+static3 <- as.character(cutreeStaticColor(bwnet$dendrograms[[3]], cutHeight=.98, minSize=100))
+# Plot the dendrogram with module colors
+sizeGrWindow(10,5);
+plotDendroAndColors(bwnet$dendrograms[[3]], 
+                    colors = data.frame( moduleColours[bwnet$blockGenes[[3]]],static3),
+                    dendroLabels = FALSE, abHeight = 0.99,
+                    main = "Gene dendrogram and module colors")
+
+
+static4 <- as.character(cutreeStaticColor(bwnet$dendrograms[[4]], cutHeight=.98, minSize=100))
+
+# Plot the dendrogram with module colors
+sizeGrWindow(10,5);
+plotDendroAndColors(bwnet$dendrograms[[4]], 
+                    colors = data.frame(moduleColours[bwnet$blockGenes[[4]]],static4),
+                    dendroLabels = FALSE, abHeight = 0.99,
+                    main = "Gene dendrogram and module colors")
+
+
+
+static5 <- as.character(cutreeStaticColor(bwnet$dendrograms[[5]], cutHeight=.98, minSize=100))
+# Plot the dendrogram with module colors
+sizeGrWindow(10,5);
+plotDendroAndColors(bwnet$dendrograms[[5]], 
+                    colors = data.frame( moduleColours[bwnet$blockGenes[[5]]],static5),
+                    dendroLabels = FALSE, abHeight = 0.99,
+                    main = "Gene dendrogram and module colors")
+
+
+#### Now concatonate all the static colours
+staticColours <- c(static1, static2, static3, static4, static5)
+table(staticColours)
+
+### Add to the Modules file
+
+colors = data.frame(bwnet$blockGenes[[5]],static5)
+
+
+
+MEList = moduleEigengenes(datExpr, colors = staticColours)
+MEs = MEList$eigengenes
+AEs = MEList$averageExpr
+
+##Bind MEs and AEs together
+
+ModExp <- cbind(MEs, AEs)
+## add rownames of samples
+rownames(ModExp) <- rownames(datExpr)
+### Write out file
+write.table(ModExp, "ModuleInfo_dynamic_update.txt", sep ="\t")
+
+
+ModulesSat <- data.frame(colnames(exp), staticColours)
+TRPV_mods <- Modules[Modules$colnames.exp %in% lookfor,] 
+
+
 
 MEs = bwnet$MEs;
 geneTree = bwnet$dendrograms[[1]];
