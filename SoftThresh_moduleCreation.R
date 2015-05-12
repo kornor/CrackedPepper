@@ -198,8 +198,10 @@ table(staticColours)
 ### Add to the Modules file
 
 Modules$staticColours <- staticColours
-
+lookmore <- c("LINC00511", "LINC00665","LINC00680", "DANCR", "Z83851.1", "RP9P-002", "RP11.132A1.4",
+              "AC073871.2", "MFI2.AS1")
 Interest_mods <- Modules[Modules$colnames.datExpr %in% lookfor,] 
+LncMods <- Modules[Modules$colnames.datExpr %in% lookmore,]
 ### you can see that the DNMTs pass out of the module in this case.
 
 
@@ -220,16 +222,71 @@ write.table(ModExp, "ModuleInfo_dynamic_AutoCut.txt", sep ="\t")
 
 ############## Create a data frame of just the modules of interest, to see other members
 
+BlueMod <- subset(Modules,moduleColours == "blue")
 
+MageMod <- subset(Modules, moduleColours == "magenta")
 
+MidBlue <- subset(Modules, moduleColours == "midnightblue")
 
-
-
-
-
-
-MEs = bwnet$MEs;
+##############  Save out the autos
 geneTree = c(bwnet$dendrograms[[1]],bwnet$dendrograms[[2]],
              bwnet$dendrograms[[3]],bwnet$dendrograms[[4]],bwnet$dendrograms[[5]]);
 save(MEs, moduleLabels, moduleColors, geneTree,
      file = "WGCNA_module_labels_allgenes.RData")
+
+
+######## Merging like modules
+# Calculate dissimilarity of module eigengenes
+MEDiss = 1-cor(MEs);
+# Cluster module eigengenes
+METree = flashClust(as.dist(MEDiss), method = "average");
+# Plot the result
+sizeGrWindow(7, 6)
+plot(METree, main = "Clustering of module eigengenes",
+     xlab = "", sub = "")
+
+MEDissThres = 0.25
+# Plot the cut line into the dendrogram
+abline(h=MEDissThres, col = "red")
+# Call an automatic merging function
+merge = mergeCloseModules(datExpr, moduleColours, cutHeight = MEDissThres, verbose = 3)
+# The merged module colors
+mergedColors = merge$colors;
+# Eigengenes of the new merged modules:
+mergedMEs = merge$newMEs;
+
+table(mergedColors)
+
+sizeGrWindow(12, 9)
+#pdf(file = "Plots/geneDendro-3.pdf", wi = 9, he = 6)
+plotDendroAndColors(geneTree, cbind(moduleColours, mergedColors),
+                    c("Auto", "Merged auto"),
+                    dendroLabels = FALSE, hang = 0.03, 
+                    addGuide = TRUE, guideHang = 0.05)
+
+#dev.off()
+
+# Construct numerical labels corresponding to the colors
+colorOrder = c("grey", standardColors(50));
+moduleLabels = match(mergedColors, colorOrder)-1;
+MEs = mergedMEs;
+# Save module colors and labels for use in subsequent parts
+save(MEs, moduleLabels, mergedColors, geneTree, 
+     file = "Merged_autoModules_allGenes.RData")
+##################################################
+
+
+#### Add the mergedColor info into Modules frame
+
+Modules$mergedColours <- mergedColors
+
+Interest_mods <- Modules[Modules$colnames.datExpr %in% lookfor,] 
+LncMods <- Modules[Modules$colnames.datExpr %in% lookmore,]
+
+### They have not changed module - if they had, find new members of module via:
+
+#BlueMod <- subset(Modules,moduleColours == "blue")
+
+#MageMod <- subset(Modules, moduleColours == "magenta")
+
+#MidBlue <- subset(Modules, moduleColours == "midnightblue")
