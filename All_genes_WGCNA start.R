@@ -3,15 +3,51 @@ setwd("~/Bioinformatics Work/TCGA initial project/WGCNA_lnc")
 ### This analysis includes all the genes for mRNA analysis of samples, + lncs
 ### NOT trimmed to only the methylation related ones
 
+### Load packages
+library(WGCNA)
+library(permute)
+library(lattice)
+library(vegan)
+library(scatterplot3d)
+library(MASS)
+library(nlme)
+library(mgcv)
+library(cluster)
+library(rgl)
+library(ape)
+library(picante)
+library(gdata)
+library(WriteXLS)
+library(plyr)
+library(caret)
+library(BiodiversityR)
+library(gtools)
+library(AppliedPredictiveModeling)
+library(limma)
+library(vegetarian)
+library(survival)
+library(randomForest)
+library(ggplot2)
+library(gplots)
+library(RColorBrewer)
+library(flashClust)
+transparentTheme(trans = 0.4)
+
+
+
+### Load exp file & lnc expression file
 total.exp <- read.table( "Complete_exp.txt", sep = "\t", header = TRUE, row.names = 1)
-total.exp <- as.data.frame(total.exp)
+total.exp <- as.data.frame(t(total.exp))
 lnc <- read.table("lnc_for_merge.txt", sep = "\t", header = TRUE, row.names = 1)
-lnc <- as.data.frame(t(lnc))
-merge.exp <- rbind(total.exp, lnc)
+
+merge.exp <- cbind(total.exp, lnc)
 
 exp <- merge.exp
+
 ## look for genes with missing values
-gsg = goodSamplesGenes(merge.exp, verbose = 3);
+##Exclude genes with results for less than 400 samples; exclude samples with 
+#results for less than 20 000 genes. 
+gsg = goodSamplesGenes(merge.exp, minNSamples = 400, minNGenes = 20000, verbose = 5);
 gsg$allOK
 
 
@@ -29,11 +65,7 @@ if (!gsg$allOK)
   exp = exp[gsg$goodSamples, gsg$goodGenes]
 }
 
-########### Trying again
-
-
-exp <- read.table("Total_com_merged.txt", sep = "\t",header = TRUE, row.names = 1)
-
+########### Add in the clinical files and the methylation traits of interest
 clincom <- read.table( "Clincom_merged.txt", sep = "\t",header = TRUE, row.names = 1)
 
 methTraits.com <- read.table( "MethTraits_com_merged.txt", sep = "\t",header = TRUE, row.names = 1)
@@ -60,25 +92,19 @@ plot(sampleTree,
 ## if an outlier there - cut the tree to remove it
 ## Plot a line to show the cut
 
-abline(h = 3e+05, col = "red");
+abline(h = 260, col = "red");
 
 # Determine clusters under the line (use h from above)
 
-clust = cutreeStatic(sampleTree, cutHeight = 3e+05, minSize = 10)
+clust = cutreeStatic(sampleTree, cutHeight = 260, minSize = 10)
 table(clust)
 
 # clust 1 contains the samples we want to keep.
 
 keepSamples = (clust==1)
-datExpr = exp#[keepSamples, ]
+datExpr = exp[keepSamples, ]
 nGenes = ncol(datExpr)
 nSamples = nrow(datExpr)
-
-
-
-clincom <- read.table( "Clincom_merged.txt", sep = "\t",header = TRUE, row.names = 1)
-
-methTraits.com <- read.table( "MethTraits_com_merged.txt", sep = "\t",header = TRUE, row.names = 1)
 
 
 ##Traits
