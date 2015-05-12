@@ -197,11 +197,15 @@ table(staticColours)
 
 ### Add to the Modules file
 
-colors = data.frame(bwnet$blockGenes[[5]],static5)
+Modules$staticColours <- staticColours
+
+Interest_mods <- Modules[Modules$colnames.datExpr %in% lookfor,] 
+### you can see that the DNMTs pass out of the module in this case.
 
 
+################ Make a frame of the module eigengenes for the modules in auto cut
 
-MEList = moduleEigengenes(datExpr, colors = staticColours)
+MEList = moduleEigengenes(datExpr, colors = moduleColours)
 MEs = MEList$eigengenes
 AEs = MEList$averageExpr
 
@@ -211,15 +215,21 @@ ModExp <- cbind(MEs, AEs)
 ## add rownames of samples
 rownames(ModExp) <- rownames(datExpr)
 ### Write out file
-write.table(ModExp, "ModuleInfo_dynamic_update.txt", sep ="\t")
+write.table(ModExp, "ModuleInfo_dynamic_AutoCut.txt", sep ="\t")
 
 
-ModulesSat <- data.frame(colnames(exp), staticColours)
-TRPV_mods <- Modules[Modules$colnames.exp %in% lookfor,] 
+############## Create a data frame of just the modules of interest, to see other members
+
+
+
+
+
+
 
 
 
 MEs = bwnet$MEs;
-geneTree = bwnet$dendrograms[[1]];
+geneTree = c(bwnet$dendrograms[[1]],bwnet$dendrograms[[2]],
+             bwnet$dendrograms[[3]],bwnet$dendrograms[[4]],bwnet$dendrograms[[5]]);
 save(MEs, moduleLabels, moduleColors, geneTree,
      file = "WGCNA_module_labels_allgenes.RData")
