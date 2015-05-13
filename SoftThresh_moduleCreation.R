@@ -1,4 +1,37 @@
+
+
 ### This is soft-thresholding and blockwise module creation 
+setwd("~/Bioinformatics Work/TCGA initial project/WGCNA_lnc")
+
+### Load packages
+library(WGCNA)
+library(permute)
+library(lattice)
+library(vegan)
+library(scatterplot3d)
+library(MASS)
+library(nlme)
+library(mgcv)
+library(cluster)
+library(rgl)
+library(ape)
+library(picante)
+library(gdata)
+library(WriteXLS)
+library(plyr)
+library(caret)
+library(BiodiversityR)
+library(gtools)
+library(AppliedPredictiveModeling)
+library(limma)
+library(vegetarian)
+library(survival)
+library(randomForest)
+library(ggplot2)
+library(gplots)
+library(RColorBrewer)
+library(flashClust)
+transparentTheme(trans = 0.4)
 
 #### Following on from file prep 
 
