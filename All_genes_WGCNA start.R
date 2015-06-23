@@ -1,4 +1,4 @@
-setwd("~/Bioinformatics Work/TCGA initial project/WGCNA_lnc")
+setwd("~/Bioinformatics Work/Meth & RNA/WGCNA_lnc")
 
 ### This analysis includes all the genes for mRNA analysis of samples, + lncs
 ### NOT trimmed to only the methylation related ones
@@ -34,7 +34,7 @@ library(flashClust)
 transparentTheme(trans = 0.4)
 
 
-
+## #########################################  This can be skipped - move down to load prepped file
 ### Load exp file & lnc expression file
 total.exp <- read.table( "Complete_exp.txt", sep = "\t", header = TRUE, row.names = 1)
 total.exp <- as.data.frame(t(total.exp))
@@ -65,11 +65,37 @@ if (!gsg$allOK)
   exp = exp[gsg$goodSamples, gsg$goodGenes]
 }
 
-########### Add in the clinical files and the methylation traits of interest
-clincom <- read.table( "Clincom_merged.txt", sep = "\t",header = TRUE, row.names = 1)
+exp <- as.data.frame(t(exp))
+write.table(exp, "Final_exp_lnc.txt", sep = "\t")
 
-methTraits.com <- read.table( "MethTraits_com_merged.txt", sep = "\t",header = TRUE, row.names = 1)
+############ Now need to match and trim the rows (samples) for all sets
 
+list <- intersect(rownames(methTraits), rownames(clincom))
+
+clincom <- clincom[list,]
+exp <- exp[list,]
+methTraits <- methTraits[list,]
+
+exp <- as.data.frame(t(exp))
+
+write.table(exp, "Final_exp_lnc.txt", sep = "\t")
+write.table(clincom, "Final_clin_lnc.txt", sep = "\t")
+write.table(methTraits, "Final_traits_lnc.txt", sep = "\t")
+
+###########  **************   START HERE NOW   ****************   #############
+########### Add in the exp & clinical files and the methylation traits of interest
+exp <- read.table("Final_exp_lnc.txt", sep = "\t", header = TRUE, row.names = 1)
+exp <- as.data.frame(t(exp))
+
+clincom <- read.table( "Final_clin_lnc.txt", sep = "\t",header = TRUE, row.names = 1)
+
+methTraits <- read.table("Final_traits_lnc.txt", sep = "\t",header = TRUE, row.names = 1)
+
+## look for genes with missing values
+##Exclude genes with results for less than 400 samples; exclude samples with 
+#results for less than 20 000 genes. 
+gsg = goodSamplesGenes(merge.exp, minNSamples = 413, minNGenes = 20000, verbose = 5);
+gsg$allOK
 
 
 
