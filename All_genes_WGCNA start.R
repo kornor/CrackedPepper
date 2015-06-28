@@ -14,18 +14,13 @@ library(MASS)
 library(nlme)
 library(mgcv)
 library(cluster)
-library(rgl)
+library(caret)
 library(ape)
 library(sparcl)
-
-
 library(plyr)
 library(ggplot2)
 library(gplots)
 library(RColorBrewer)
-
-transparentTheme(trans = 0.4)
-
 
 ## #########################################  This can be skipped - move down to load prepped file
 ### Load exp file & lnc expression file
@@ -136,18 +131,19 @@ ColorDendrogram(sampleTree, y = PamColours,
      sub="", xlab="", 
      labels = FALSE, branchlength = 35)
 
-legend("topright",legend=levels(factor(Pam50)),
+legend("bottomright",legend=levels(factor(Pam50)),
        fill = (c("turquoise","blue", "brown", "yellow", "green" )), cex = 1)
 ##########   Different way?
 
 plotDendroAndColors(sampleTree, PamColours,
                     groupLabels = "Pam50 subtype",
                     main = "Sample dendrogram and subtype", dendroLabels = FALSE)
-legend("topright",legend=levels(factor(Pam50)),
+legend("right",legend=levels(factor(Pam50)),
        fill = (c("turquoise","blue", "brown", "yellow", "green" )), cex = 1)
 
 
-## Might keep the top basal set, just because
+
+## Might remove the 4 outliers on the right
 ## Plot a line to show the cut
 
 abline(h = 210, col = "red");
@@ -173,7 +169,9 @@ traitRows = match(Samples, rownames(methTraits));
 datTraits = methTraits[traitRows,];
 datTraits1 = methTraits1[traitRows,];
 datTraits2 = methTraits2[traitRows,];
+traitRows = match(rownames(datTraits), rownames(allTraits))
 datTraits3 = allTraits[traitRows,];
+
 
 datClin = clincom[traitRows,]
 
@@ -210,7 +208,7 @@ traitColors = numbers2colors(datTraits2,
                              signed = FALSE);
 # Plot the sample dendrogram and the colors underneath.
 plotDendroAndColors(sampleTree2, traitColors,
-                    groupLabels = names(datTraits2),
+                    groupLabels = FALSE,
                     main = "Sample dendrogram and trait heatmap", dendroLabels = FALSE)
 
 ################

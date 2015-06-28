@@ -83,7 +83,7 @@ text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
 ##################################################
 
 ##To check the efficiency of the chosen soft power, put it in here and plot
-### Might try values as indicated by above
+### Might try values as indicated by above (11 & then 12)
 
 k=softConnectivity(datE=datExpr,power=12, type = "signed")
 
@@ -110,7 +110,7 @@ plot(geneTree, xlab="", sub="", main = "Gene clustering on TOM-based dissimilari
 
 ###### Now we're going to go ahead with module creation
 # We like large modules, so we set the minimum module size relatively high:
-minModuleSize = 30;
+minModuleSize = 50;
 # Module identification using dynamic tree cut:
 dynamicMods = cutreeDynamic(dendro = geneTree, distM = dissTOM,
                             deepSplit = 2, pamRespectsDendro = FALSE,
@@ -139,7 +139,7 @@ sizeGrWindow(7, 6)
 plot(METree, main = "Clustering of module eigengenes",
      xlab = "", sub = "")
 
-MEDissThres = 0.25
+MEDissThres = 0.3
 # Plot the cut line into the dendrogram
 abline(h=MEDissThres, col = "red")
 # Call an automatic merging function
@@ -178,9 +178,9 @@ Interest_mods <- Modules[Modules$colnames.datExpr %in% lookfor,]
 
 # Save module colors and labels for use in subsequent parts
 save(MEs, moduleLabels, moduleColors, geneTree, 
-     file = "Dynamic_merged_lncRNA_sub.RData")
+     file = "Dynamic_merged_lncRNA.RData")
 
-staticCut <- as.character(cutreeStaticColor(geneTree, cutHeight=.99, minSize=30))
+staticCut <- as.character(cutreeStaticColor(geneTree, cutHeight=.99, minSize=50))
 # Plot the dendrogram with module colors
 sizeGrWindow(10,5);
 plotDendroAndColors(geneTree, 
@@ -193,7 +193,16 @@ table(staticCut)
 
 
 ##################
-MEList = moduleEigengenes(datExpr, colors = staticCut)
+
+# Rename to moduleColors
+moduleColors = staticCut
+# Construct numerical labels corresponding to the colors
+colorOrder = c("grey", standardColors(50));
+moduleLabels = match(moduleColors, colorOrder)-1;
+
+
+
+MEList = moduleEigengenes(datExpr, colors = moduleColors)
 MEs = MEList$eigengenes
 AEs = MEList$averageExpr
 
@@ -203,10 +212,10 @@ ModExp <- cbind(MEs, AEs)
 ## add rownames of samples
 rownames(ModExp) <- rownames(datExpr)
 ### Write out file
-write.table(ModExp, "ModuleInfo_static_sub.txt", sep ="\t")
+write.table(ModExp, "ModuleInfo_static.txt", sep ="\t")
 
 
-save(MEs, staticCut, geneTree, file = "Static_sub_lncRNA.RData")
+save(MEs, moduleLabels, moduleColors, geneTree, file = "Static_lncRNA.RData")
 
 
 
@@ -218,12 +227,6 @@ GreenMod <- subset(Modules, moduleColours == "green")
 
 MidBlue <- subset(Modules, moduleColours == "midnightblue")
 
-##############  Save out the autos
-geneTree = c(bwnet$dendrograms[[1]],bwnet$dendrograms[[2]],
-             bwnet$dendrograms[[3]],bwnet$dendrograms[[4]],bwnet$dendrograms[[5]]);
-save(MEs, moduleLabels, moduleColors, geneTree,
-     file = "WGCNA_module_labels_allgenes.RData")
-
 ##################################################
 
 
@@ -233,6 +236,19 @@ Modules$mergedColours <- mergedColors
 
 Interest_mods <- Modules[Modules$colnames.datExpr %in% lookfor,] 
 LncMods <- Modules[Modules$colnames.datExpr %in% lookmore,]
+
+
+Modules <- data.frame(colnames(datExpr), staticCut)
+Modules$dynamicCut <- moduleColors
+lookfor <- c("DNMT1", "DNMT3A", "DNMT3B", "UHRF1", "EZH2", "DNMT3L", "MTHFR")
+
+Interest_mods$Static <- Modules[Modules$colnames.datExpr %in% lookfor,] 
+
+
+####Write out the interest modules file and the total module assignation file
+
+write.table(Modules, "Module_assignation.txt", sep = "\t")
+write.table(Interest_mods, "Interest_modules.txt", sep = "\t")
 
 ### They have not changed module - if they had, find new members of module via:
 
