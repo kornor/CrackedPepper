@@ -197,6 +197,30 @@ plotDendroAndColors(sampleTree2, traitColors,
                     groupLabels = names(datTraits),
                     main = "Sample dendrogram and trait heatmap", dendroLabels = FALSE)
 
+##############1
+traitColors = numbers2colors(datTraits1, 
+                             signed = FALSE);
+# Plot the sample dendrogram and the colors underneath.
+plotDendroAndColors(sampleTree2, traitColors,
+                    groupLabels = names(datTraits1),
+                    main = "Sample dendrogram and trait heatmap", dendroLabels = FALSE)
+
+###############2
+traitColors = numbers2colors(datTraits2, 
+                             signed = FALSE);
+# Plot the sample dendrogram and the colors underneath.
+plotDendroAndColors(sampleTree2, traitColors,
+                    groupLabels = names(datTraits2),
+                    main = "Sample dendrogram and trait heatmap", dendroLabels = FALSE)
+
+################
+traitColors = numbers2colors(datTraits3, 
+                             signed = FALSE);
+# Plot the sample dendrogram and the colors underneath.
+plotDendroAndColors(sampleTree2, traitColors,
+                    groupLabels = names(datTraits3),
+                    main = "Sample dendrogram and trait heatmap", dendroLabels = FALSE)
+
 
 #### Note that the side panel - the "basal" group, is hypomethylated across all (comparatively)
 

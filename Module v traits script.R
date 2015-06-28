@@ -37,6 +37,106 @@ labeledHeatmap(Matrix = moduleTraitCor,
                zlim = c(-1,1),
                main = paste("High module expression vs trait genes"))
 ######################################
+################################Define numbers of genes and samples to do traits comparison
+nGenes = ncol(datExpr);
+nSamples = nrow(datExpr);
+# Recalculate MEs with color labels
+MEs0 = moduleEigengenes(datExpr, moduleColours)$eigengenes
+MEs = orderMEs(MEs0)
+
+moduleTraitCor = cor(MEs, datTraits1, use = "p");
+moduleTraitPvalue = corPvalueStudent(moduleTraitCor, nSamples);
+
+sizeGrWindow(10,6)
+# Will display correlations and their p-values
+textMatrix = paste(signif(moduleTraitCor, 2), "\n(",
+                   signif(moduleTraitPvalue, 1), ")", sep = "");
+
+##########Will only display correlations
+textMatrix = paste(signif(moduleTraitCor, 2),sep = "");
+dim(textMatrix) = dim(moduleTraitCor)
+par(mar = c(6, 8.5, 3, 3));
+
+# Display the values within a heatmap plot
+labeledHeatmap(Matrix = moduleTraitCor,
+               xLabels = colnames(datTraits1),
+               yLabels = names(MEs),
+               ySymbols = names(MEs),
+               colorLabels = FALSE,
+               colors = blueWhiteRed(50),
+               #textMatrix = textMatrix,
+               setStdMargins = FALSE,
+               cex.text = 0.85,
+               zlim = c(-1,1),
+               main = paste("High module expression vs trait genes"))
+######################################
+################################Define numbers of genes and samples to do traits comparison
+nGenes = ncol(datExpr);
+nSamples = nrow(datExpr);
+# Recalculate MEs with color labels
+MEs0 = moduleEigengenes(datExpr, moduleColours)$eigengenes
+MEs = orderMEs(MEs0)
+
+moduleTraitCor = cor(MEs, datTraits2, use = "p");
+moduleTraitPvalue = corPvalueStudent(moduleTraitCor, nSamples);
+
+sizeGrWindow(10,6)
+# Will display correlations and their p-values
+textMatrix = paste(signif(moduleTraitCor, 2), "\n(",
+                   signif(moduleTraitPvalue, 1), ")", sep = "");
+
+##########Will only display correlations
+textMatrix = paste(signif(moduleTraitCor, 2),sep = "");
+dim(textMatrix) = dim(moduleTraitCor)
+par(mar = c(6, 8.5, 3, 3));
+
+# Display the values within a heatmap plot
+labeledHeatmap(Matrix = moduleTraitCor,
+               xLabels = colnames(datTraits2),
+               yLabels = names(MEs),
+               ySymbols = names(MEs),
+               colorLabels = FALSE,
+               colors = blueWhiteRed(50),
+               #textMatrix = textMatrix,
+               setStdMargins = FALSE,
+               cex.text = 0.85,
+               zlim = c(-1,1),
+               main = paste("High module expression vs trait genes"))
+######################################
+
+################################Define numbers of genes and samples to do traits comparison
+nGenes = ncol(datExpr);
+nSamples = nrow(datExpr);
+# Recalculate MEs with color labels
+MEs0 = moduleEigengenes(datExpr, moduleColours)$eigengenes
+MEs = orderMEs(MEs0)
+
+moduleTraitCor = cor(MEs, datTraits3, use = "p");
+moduleTraitPvalue = corPvalueStudent(moduleTraitCor, nSamples);
+
+sizeGrWindow(10,6)
+# Will display correlations and their p-values
+textMatrix = paste(signif(moduleTraitCor, 2), "\n(",
+                   signif(moduleTraitPvalue, 1), ")", sep = "");
+
+##########Will only display correlations
+textMatrix = paste(signif(moduleTraitCor, 2),sep = "");
+dim(textMatrix) = dim(moduleTraitCor)
+par(mar = c(6, 8.5, 3, 3));
+
+# Display the values within a heatmap plot
+labeledHeatmap(Matrix = moduleTraitCor,
+               xLabels = colnames(datTraits3),
+               yLabels = names(MEs),
+               ySymbols = names(MEs),
+               colorLabels = FALSE,
+               colors = blueWhiteRed(50),
+               #textMatrix = textMatrix,
+               setStdMargins = FALSE,
+               cex.text = 0.85,
+               zlim = c(-1,1),
+               main = paste("High module expression vs trait genes"))
+######################################
 
 ###### Set the trait of most interest in determining the modules
 
