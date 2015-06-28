@@ -1,7 +1,7 @@
 
 
 ### This is soft-thresholding and blockwise module creation 
-setwd("~/Bioinformatics Work/TCGA initial project/WGCNA_lnc")
+setwd("~/Bioinformatics Work/Meth & RNA/WGCNA_lnc")
 
 ### Load packages
 library(WGCNA)
@@ -35,20 +35,20 @@ transparentTheme(trans = 0.4)
 
 #### Following on from file prep 
 
-load(file="lncRNA_total_input.RData")
+#load(file="lncRNA_total_input.RData")
+load(file = "lncRNA_trimmed_input.RData")
 
+#### Set Pam50 factor again if need
 
-####
-
-
+Pam50 <- as.factor(datClin$PAM50Call_RNAseq)
 
 ################
 # Choose a set of soft-thresholding powers
 powers = c(c(1:10), seq(from = 10, to=18, by=2))
 # Call the network topology analysis function
 
-sft = pickSoftThreshold(datExpr, powerVector = powers, verbose = 5, 
-                        blockSize = 5000, networkType = "signed")
+sft = pickSoftThreshold(datExpr, powerVector = powers, verbose = 3, 
+                        blockSize = 5000, networkType = "signed", moreNetworkConcepts = TRUE)
 
 
 # Plot the results:
@@ -82,6 +82,8 @@ text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
 ##################################################
 
 ##To check the efficiency of the chosen soft power, put it in here and plot
+### Might try 8 and 9
+
 k=softConnectivity(datE=datExpr,power=12, type = "signed")
 
 # Plot a histogram of k and a scale free topology plot
@@ -90,15 +92,16 @@ par(mfrow=c(1,2))
 hist(k)
 scaleFreePlot(k, main="Check scale free topology\n")
 
-
+### After checking - use value of 9 for softthresholding
+####  Proceed to blockwise module creation using automatic cutoffs. 
 
 bwnet = blockwiseModules(datExpr, power = 12, networkType = "signed",
                          TOMType = "signed", minModuleSize = 100,
-                         reassignThreshold = 0, mergeCutHeight = 0.25,
+                         reassignThreshold = 1e-6, mergeCutHeight = 0.15,
                          numericLabels = TRUE, pamRespectsDendro = FALSE,
                          saveTOMs = TRUE,
-                         saveTOMFileBase = "LncTOM_signed",deepsplit = 2,
-                         verbose = 5)
+                         saveTOMFileBase = "LncTOM__topK_signed_test",deepsplit = 2,
+                         verbose = 3)
 ################
 ## Create a frame of just datExp for genes in each block
 
@@ -111,17 +114,9 @@ block5 <- datExpr[bwnet$blockGenes[[5]]]
 
 ### See if you can find a gene in a block
 match("FOXM1", names(block1))
-match("FOXM1", names(block2))
-match("FOXM1", names(block3))
-match("FOXM1", names(block4))
-match("FOXM1", names(block5))
 
-match("DNMT1", names(block1))
+
 match("DNMT1", names(block2))
-match("DNMT1", names(block3))
-match("DNMT1", names(block4))
-match("DNMT1", names(block5))
-
 
 
 # Convert labels to colors for plotting
@@ -139,7 +134,7 @@ table(moduleColours)
 
 
 Modules <- data.frame(colnames(datExpr), moduleColours)
-lookfor <- c("DNMT1", "DNMT3A", "DNMT3B", "UHRF1", "EZH2", "DNMT3L")
+lookfor <- c("DNMT1", "DNMT3A", "DNMT3B", "UHRF1", "EZH2", "DNMT3L", "MTHFR")
 
 Interest_mods <- Modules[Modules$colnames.datExpr %in% lookfor,] 
 
@@ -255,9 +250,9 @@ write.table(ModExp, "ModuleInfo_dynamic_AutoCut.txt", sep ="\t")
 
 ############## Create a data frame of just the modules of interest, to see other members
 
-BlueMod <- subset(Modules,moduleColours == "blue")
+BlackMod <- subset(Modules,moduleColours == "black")
 
-MageMod <- subset(Modules, moduleColours == "magenta")
+GreenMod <- subset(Modules, moduleColours == "green")
 
 MidBlue <- subset(Modules, moduleColours == "midnightblue")
 
@@ -278,7 +273,7 @@ sizeGrWindow(7, 6)
 plot(METree, main = "Clustering of module eigengenes",
      xlab = "", sub = "")
 
-MEDissThres = 0.25
+MEDissThres = 0.35
 # Plot the cut line into the dendrogram
 abline(h=MEDissThres, col = "red")
 # Call an automatic merging function
@@ -318,8 +313,8 @@ LncMods <- Modules[Modules$colnames.datExpr %in% lookmore,]
 
 ### They have not changed module - if they had, find new members of module via:
 
-#BlueMod <- subset(Modules,moduleColours == "blue")
-
+BlueMod <- subset(Modules,moduleColours == "blue")
+BlackMod <-subset(Modules, moduleColours == "black")
 #MageMod <- subset(Modules, moduleColours == "magenta")
 
 #MidBlue <- subset(Modules, moduleColours == "midnightblue")

@@ -31,7 +31,7 @@ labeledHeatmap(Matrix = moduleTraitCor,
                ySymbols = names(MEs),
                colorLabels = FALSE,
                colors = blueWhiteRed(50),
-               textMatrix = textMatrix,
+               #textMatrix = textMatrix,
                setStdMargins = FALSE,
                cex.text = 0.85,
                zlim = c(-1,1),
@@ -40,7 +40,7 @@ labeledHeatmap(Matrix = moduleTraitCor,
 
 ###### Set the trait of most interest in determining the modules
 
-y = datTraits$CD38
+y = datTraits$MethScore
 
 #### Calculate the modules' correlation to this trait
 
@@ -61,13 +61,13 @@ plotMEpairs(datME,y=y)
 
 sizeGrWindow(8,9)
 par(mfrow=c(3,1), mar=c(1, 2, 4, 1))
-which.module="red";
-plotMat(t(scale(datExpr[,moduleColors==which.module ]) ),nrgcols=30,rlabels=T,
+which.module="blue";
+plotMat(t(scale(datExpr[,moduleColours==which.module ]) ),nrgcols=30,rlabels=T,
         clabels=T,rcols=which.module,
         title=which.module )
 
 # for the other modules... we use
-which.module="brown";
+which.module="black";
 plotMat(t(scale(datExpr[,moduleColours==which.module ]) ),nrgcols=30,rlabels=T,
         clabels=T,rcols=which.module,
         title=which.module )
@@ -80,6 +80,20 @@ plotMat(t(scale(datExpr[,moduleColors==which.module ]) ),nrgcols=30,rlabels=T,
 
 #######
 GS1=as.numeric(cor(y,datExpr, use="p"))
+
+GeneSig <- data.frame(GS1) 
+rownames(GeneSig)  <- colnames(datExpr)
+list <- GeneSig[BlueMod$colnames.datExpr.,]
+BlueSig <- as.data.frame(GeneSig[BlueMod$colnames.datExpr.,])
+rownames(BlueSig) <- BlueMod$colnames.datExpr.
+ 
+
+BlackSig <- as.data.frame(GeneSig[BlackMod$colnames.datExpr.,])
+rownames(BlackSig) <- BlackMod$colnames.datExpr. 
+
+BlackSig$DNMT1
+
+  
 GeneSignificance=abs(GS1)
 # Next module significance is defined as average gene significance.
 ModuleSignificance=tapply(GeneSignificance, moduleColours, mean, na.rm=T)
@@ -92,23 +106,35 @@ p.values = corPvalueStudent(cor(y,datME, use="p"), nSamples = length(y))
 write.table(p.values, "Module correlation Trait.txt", sep ="\t")
 
 ADJ1=abs(cor(datExpr,use="p"))^12
-Alldegrees1=intramodularConnectivity(ADJ1, dynamicColors)
+Alldegrees1=intramodularConnectivity(ADJ1, moduleColours)
 head(Alldegrees1)
 
 
-colorlevels=unique(moduleColors)
+colorlevels=unique(moduleColours)
 sizeGrWindow(9,6)
 par(mfrow=c(2,as.integer(0.5+length(colorlevels)/2)))
 par(mar = c(4,5,3,1))
 for (i in c(1:length(colorlevels)))
 {
   whichmodule=colorlevels[[i]];
-  restrict1 = (moduleColors==whichmodule);
+  restrict1 = (moduleColours==whichmodule);
   verboseScatterplot(Alldegrees1$kWithin[restrict1],
-                     GeneSignificance[restrict1], col=dynamicColors[restrict1],
+                     GeneSignificance[restrict1], col=moduleColours[restrict1],
                      main=whichmodule,
                      xlab = "Connectivity", ylab = "Gene Significance", abline = TRUE)
 }
+
+######Just one module
+whichmodule="blue";
+restrict1 = (moduleColours==whichmodule);
+verboseScatterplot(Alldegrees1$kWithin[restrict1],
+                   GeneSignificance[restrict1], col=moduleColours[restrict1],
+                   main=whichmodule,
+                   xlab = "Connectivity", ylab = "Gene Significance", abline = TRUE)
+
+
+
+
 
 ##### Output the measures of gene signifigance
 
@@ -133,12 +159,12 @@ head(out1)
 #####
 
 
-ConnectRed <- Alldegrees1[moduleColors == "red",]
+ConnectBlue <- Alldegrees1[moduleColours == "blue",]
 ConnectBrown <- Alldegrees1[moduleColors == "brown",]
 ConnectTurq <- Alldegrees1[moduleColors == "turquoise",]
 
 
-write.table(ConnectRed, "Red_intramodular_connect.txt", sep ="\t")
+write.table(ConnectBlue, "Blue_intramodular_connect.txt", sep ="\t")
 write.table(ConnectBrown, "Brown_intramodular_connect.txt", sep ="\t")
 write.table(ConnectTurq, "Turquoise_intramodular_connect.txt", sep ="\t")
 
@@ -209,9 +235,10 @@ ________
 list <- row.names(Top30Black)
 TOMblack <- datExpr[,list]
 
+TOMBlue <- subset(datExpr, moduleColours == "blue")
 
 # Recalculate topological overlap on only the new small expression set
-TOM = TOMsimilarityFromExpr(TOMblack, power = 6);
+TOM = TOMsimilarityFromExpr(TOMblue, power = 12);
 
 # Export the network into edge and node list files Cytoscape can read
 cyt = exportNetworkToCytoscape(TOM,
